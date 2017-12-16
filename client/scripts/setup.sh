@@ -23,11 +23,13 @@ function navigate_to_correct_directory() {
 function check_aws() {
   info "checking aws cli configuration..."
 
-	if ! [ -f ~/.aws/config ]; then
-		if ! [ -f ~/.aws/credentials ]; then
-			fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
-		fi
-	fi
+  if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+    if ! [ -f ~/.aws/config ]; then
+      if ! [ -f ~/.aws/credentials ]; then
+        fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
+      fi
+    fi
+  fi
 
   success "aws cli is configured"
 }
@@ -95,19 +97,20 @@ function generate_config() {
   success "Found IoT Endpint"
 
   # Region
-  region=$(aws configure get region)
+  region=$(if [ "$AWS_DEFAULT_REGION" = "" ]; then aws configure get region; else echo "$AWS_DEFAULT_REGION"; fi)
+  # region=$(aws configure get region)
   jq --arg AWS_REGION $region '. + { AwsRegion: $AWS_REGION }' config.json > temp.json \
     && mv temp.json config.json
   success "Found Region"
 
   # LogLevel
-  log_level=silent
+  log_level=debug
   jq --arg LOG_LEVEL $log_level '. + { LogLevel: $LOG_LEVEL }' config.json > temp.json \
     && mv temp.json config.json
   success "Set log level"
 
   # Mqtt debug level
-  mqtt_debug_level=false
+  mqtt_debug_level=2
   jq --arg MQTT_DEBUG_LEVEL $mqtt_debug_level '. + { MqttDebugLevel: $MQTT_DEBUG_LEVEL }' config.json > temp.json \
     && mv temp.json config.json
   success "Set MQTT Debug level"

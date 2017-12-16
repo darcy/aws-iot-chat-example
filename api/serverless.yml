@@ -10,9 +10,8 @@ custom:
   hooks:
     after:aws:deploy:finalize:cleanup:
       - ./scripts/attachConfirmUserTrigger.sh
-      - ./../client/scripts/setup.sh
     before:remove:remove:
-      - ./scripts/detach_policies.sh
+      - ./scripts/detachPolicies.sh
 
 provider:
   name: aws

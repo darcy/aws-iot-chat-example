@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 
 # This script is used until a bug regarding Cognito User Pools in serverless is fixed
 # https://github.com/serverless/serverless/pull/3799
@@ -21,11 +21,13 @@ function success() {
 function check_aws() {
   info "checking aws cli configuration..."
 
-	if ! [ -f ~/.aws/config ]; then
-		if ! [ -f ~/.aws/credentials ]; then
-			fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
-		fi
-	fi
+  if [ -z "$AWS_ACCESS_KEY" ]; then
+    if ! [ -f ~/.aws/config ]; then
+      if ! [ -f ~/.aws/credentials ]; then
+        fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
+      fi
+    fi
+  fi
 
   success "aws cli is configured"
 }
@@ -44,7 +46,7 @@ function check_stack() {
   info "checking if $STACK_NAME exists..."
 
   summaries=$(aws cloudformation list-stacks | jq --arg STACK_NAME "$STACK_NAME" '.StackSummaries |
-    .[] | select((.StackName ==
+  .[] | select((.StackName ==
   $STACK_NAME) and ((.StackStatus == "CREATE_COMPLETE") or (.StackStatus == "UPDATE_COMPLETE")))')
   if [ -z "$summaries" ]
   then
@@ -59,7 +61,7 @@ function attach_trigger() {
 
   # Get all CloudFormation Outputs
   outputs=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq '.Stacks | .[] |
-    .Outputs | .[]')
+  .Outputs | .[]')
   user_pool_id=$(echo $outputs | jq --raw-output 'select(.OutputKey == "UserPoolId") | .OutputValue')
   lambda_arn=$(echo $outputs | jq --raw-output 'select(.OutputKey == "AutoConfirmUserFnArn") | .OutputValue')
 

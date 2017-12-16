@@ -1,4 +1,4 @@
-##!/bin/bash
+#!/bin/bash
 
 # To tear down the stack, we must detach principals from policies. This script will be run as a before:remove hook to prevent the following error
 # An error occurred: PublicSubscribePolicy - The policy cannot be deleted as the policy is attached to one or more principals (name=PublicSubscribePolicy).
@@ -20,11 +20,13 @@ function success() {
 function check_aws() {
   info "checking aws cli configuration..."
 
-	if ! [ -f ~/.aws/config ]; then
-		if ! [ -f ~/.aws/credentials ]; then
-			fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
-		fi
-	fi
+  if [ -z "$AWS_ACCESS_KEY" ]; then
+    if ! [ -f ~/.aws/config ]; then
+      if ! [ -f ~/.aws/credentials ]; then
+        fail "AWS config not found or CLI not installed. Please run \"aws configure\"."
+      fi
+    fi
+  fi
 
   success "aws cli is configured"
 }

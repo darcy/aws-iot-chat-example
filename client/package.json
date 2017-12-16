@@ -30,6 +30,7 @@
     "uuid": "^3.1.0"
   },
   "scripts": {
+    "setup": "./scripts/setup.sh",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "predeploy": "npm run build",
